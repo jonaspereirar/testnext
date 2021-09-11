@@ -1,69 +1,160 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { doLogout } from '../../services/AuthService';
-import {getSettings} from '../../services/SettingsService';
+import React, { useEffect, useState, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
+import { getSettings, updateSettings } from '../../services/SettingsService';
+import Menu from '../../components/Menu/Menu';
+import Symbols from './Symbols'
 
 function Settings() {
-  const history = useHistory();
-  const [error, setError] = useState('');
-  const [settings, setSettings] = useState({
-    email: '',
-    apiUrl: '',
-    accessKey: '',
-    keySecret: '',
-  })
 
-  useEffect(() =>{
-    const token = localStorage.getItem('token')
+    const inputEmail = useRef('');
+    const inputNewPassword = useRef('');
+    const inputConfirmPassword = useRef('');
+    const inputApiUrl = useRef('');
+    const inputAccessKey = useRef('');
+    const inputSecretKey = useRef('');
 
-      getSettings(token)
-        .then(response => {
-          setSettings(response);
-        })
-        .catch(err => {
-          if(err.response && err.response.status === 401)
-            return history.push('/')
-            if (err.response)
-              setError(err.response.data);
-            else
-            setError(err.message);
-        })
-  }, [])
+    const history = useHistory();
 
-  function onLogoutClick(event) {
-    const token = localStorage.getItem('token');
+    const [error, setError] = useState('');
 
-    doLogout(token)
-    .then(response => {
-      localStorage.removeItem('token');
-      history.push('/');
-    })
-    .catch(err => {
-      setError(err.message);
-    })
-  }
+    const [success, setSuccess] = useState('');
 
-  return (<main>
-      <section className="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center">
-        <div className="container">
-          <p className="text-center">
-            <Link to="/" className="d-flex align-items-center justify-content">
-              <svg className="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd"></path>
-              </svg>
-              {settings.email}
-            </Link>
-            <button type="button" className="btn btn-primary" onClick={onLogoutClick}>Sair</button>
-            {
-              error
-                  ? <div className="alert alert-danger">{error}</div>
-                  : <React.Fragment></React.Fragment>
-            }
-          </p>
-        </div>
-      </section>
-    </main>)
-  
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        getSettings(token)
+            .then(settings => {
+                inputEmail.current.value = settings.email;
+                inputApiUrl.current.value = settings.apiUrl;
+                inputAccessKey.current.value = settings.accessKey;
+            })
+            .catch(err => {
+                if (err.response && err.response.status === 401)
+                    return history.push('/')
+
+                setError(err.response ? err.response.data : err.message);
+            })
+    }, [])
+
+    function onFormSubmit(event) {
+        event.preventDefault();
+
+        if ((inputNewPassword.current.value || inputConfirmPassword.current.value)
+            && inputNewPassword.current.value !== inputConfirmPassword.current.value)
+            return setError(`Os campos de "Nova Senha" e "Confirmar Senha" devem ser iguais.`);
+
+        const token = localStorage.getItem("token");
+        updateSettings({
+            email: inputEmail.current.value,
+            password: inputNewPassword.current.value ? inputNewPassword.current.value : null,
+            apiUrl: inputApiUrl.current.value,
+            accessKey: inputAccessKey.current.value,
+            secretKey: inputSecretKey.current.value ? inputSecretKey.current.value : null
+        }, token)
+            .then(result => {
+                if (result) {
+                    setError('');
+                    inputSecretKey.current.value = '';
+                    inputNewPassword.current.value = '';
+                    inputConfirmPassword.current.value = '';
+                    return setSuccess(`Configurações salvas com sucesso!`);
+                }
+                else {
+                    setSuccess('');
+                    return setError(`N.`);
+                }
+            })
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                return setError(`Não foi possível salvar as suas configurações, Tente novamente`);
+            })
+    }
+
+    return (
+        <React.Fragment>
+            <Menu />
+            <main className="content">
+                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div className="d-block mb-4 mb-md-0">
+                        <h1 className="h4">Configurações</h1>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12">
+                        <div className="card card-body border-0 shadow mb-4">
+                            <form>
+                                <h2 className="h5 mb-4">Informações Gerais</h2>
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <div className="form-group">
+                                            <label htmlFor="email">Email</label>
+                                            <input ref={inputEmail} className="form-control" id="email" type="email" placeholder="name@company.com" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <div>
+                                            <label htmlFor="newPassword">Nova Senha</label>
+                                            <input ref={inputNewPassword} className="form-control" id="newPassword" type="password" placeholder="Digite nova senha" />
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <div>
+                                            <label htmlFor="confirmPassword">Confirmar Senha</label>
+                                            <input ref={inputConfirmPassword} className="form-control" id="confirmPassword" type="password" placeholder="Digite novamente a nova senha" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <h2 className="h5 mb-4">Exchange Info</h2>
+                                <div className="row">
+                                    <div className="col-sm-12 mb-3">
+                                        <div className="form-group">
+                                            <label htmlFor="email">API URL</label>
+                                            <input ref={inputApiUrl} className="form-control" id="apiUrl" type="text" placeholder="Sua API URL" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-12 mb-3">
+                                        <div className="form-group">
+                                            <label htmlFor="email">Access Key</label>
+                                            <input ref={inputAccessKey} className="form-control" id="accessKey" type="text" placeholder="Seu access key" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-12 mb-3">
+                                        <div className="form-group">
+                                            <label htmlFor="email">Secret Key</label>
+                                            <input ref={inputSecretKey} className="form-control" id="accessKey" type="password" placeholder="Seu secret key" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap">
+                                        <div className="col-sm-3">
+                                            <button className="btn btn-gray-800 mt-2 animate-up-2" type="submit" onClick={onFormSubmit}>Guardar</button>
+                                        </div>
+                                        {
+                                            error
+                                                ? <div className="alert alert-danger mt-2 col-9 py-2">{error}</div>
+                                                : <React.Fragment></React.Fragment>
+                                        }
+                                        {
+                                            success
+                                                ? <div className="alert alert-success mt-2 col-9 py-2">{success}</div>
+                                                : <React.Fragment></React.Fragment>
+                                        }
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <Symbols />
+            </main>
+        </React.Fragment>
+    );
 }
 
 export default Settings;
