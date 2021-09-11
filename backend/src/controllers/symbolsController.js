@@ -29,6 +29,7 @@ async function updateSymbol(req, res, next) {
     res.json(result);
 }
 
+//Symbols sicronizeadas com Binance testnet
 async function syncSymbols(req, res, next) {
     const settingsRepository = require('../repositories/settingsRepository');
     const settings = await settingsRepository.getSettings(res.locals.token.id);
