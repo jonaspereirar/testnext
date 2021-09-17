@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 
 /**
  * props
@@ -13,6 +13,26 @@ function TickerRow(props) {
     high: '0',
     low: '0'
   })
+
+  const tickerRow = useMemo(() => (
+    <tr>
+    <td className="text-gray-900">
+      {props.symbol}
+    </td>
+    <td className="text-gray-900">
+      {`${data.close}`.substring(0,8)}
+    </td>
+    <td className="text-gray-900">
+    {`${data.open}`.substring(0,8)}
+    </td>
+    <td className="text-gray-900">
+    {`${data.high}`.substring(0,8)}
+    </td>
+    <td className="text-gray-900">
+    {`${data.low}`.substring(0,8)}
+    </td>
+  </tr>
+  ), [data.close, data.open, data.high, data.low]);
 
   useEffect(() => {
     if(!props.data) return;
@@ -34,25 +54,7 @@ function TickerRow(props) {
   }, [props.data])
 
 
-  return (<React.Fragment>
-    <tr>
-      <td className="text-gray-900">
-        {props.symbol}
-      </td>
-      <td className="text-gray-900">
-        {`${data.close}`.substring(0,8)}
-      </td>
-      <td className="text-gray-900">
-      {`${data.open}`.substring(0,8)}
-      </td>
-      <td className="text-gray-900">
-      {`${data.high}`.substring(0,8)}
-      </td>
-      <td className="text-gray-900">
-      {`${data.low}`.substring(0,8)}
-      </td>
-    </tr>
-  </React.Fragment>)
+  return (tickerRow)
 }
 
 export default TickerRow;

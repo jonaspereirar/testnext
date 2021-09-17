@@ -3,6 +3,7 @@ import SelectQuote, {filterSymbolNames, getDefaultQuote } from '../../../compone
 import TickerRow from './TickerRow';
 import {getSymbols} from '../../../services/SymbolsService';
 import {useHistory} from 'react-router-dom'
+import '../Dashboard.css';
 /**
  * props
  * -data
@@ -43,8 +44,8 @@ function MiniTicker(props) {
             </div>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table align-items-center table-flush table-sm table-hover">
+        <div className="table-responsive divScroll">
+          <table className="table align-items-center table-flush table-sm table-hover tableFixHead">
             <thead className="thead-light">
               <tr>
                 <th className="border-botton" scope="col">Moeda</th>
