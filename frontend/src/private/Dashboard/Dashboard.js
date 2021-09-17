@@ -15,9 +15,11 @@ function Dashboard() {
     onMessage: () => {
       if(lastJsonMessage){
         if(lastJsonMessage.miniTicker) setMiniTickerState(lastJsonMessage.miniTicker);
-        if(lastJsonMessage.book) setBookState(lastJsonMessage.book);
+        if(lastJsonMessage.book) {
+          lastJsonMessage.book.forEach(b => bookState[b.symbol] = b)
+          setBookState(bookState);
+        }
       }
-
     },
     queryParams: {},
     onError: (err) => console.error(err),
