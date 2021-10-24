@@ -33,7 +33,7 @@ function BookTicker(props) {
 
   return(
     <React.Fragment>
-      <div className="col-sm-12 col-md-4">
+      <div className="col-sm-12 col-md-6 col-md-4">
         <div className="card border-0 shadow">
             <div className="card-header">
               <div className="row">
@@ -50,8 +50,8 @@ function BookTicker(props) {
             <thead className="thead-light">
               <tr>
                 <th className="border-botton col-2" scope="col">Moeda</th>
-                <th className="border-bottom col-2" scope="col">BID</th>
-                <th className="border-bottom col-2" scope="col">ASK</th>
+                <th className="border-bottom col-2" scope="col">Comprar</th>
+                <th className="border-bottom col-2" scope="col">Vender</th>
               </tr>
             </thead>
               <tbody>

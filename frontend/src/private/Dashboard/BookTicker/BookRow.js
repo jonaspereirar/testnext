@@ -17,7 +17,8 @@ function BookRow(props) {
       <td className="text-gray-900">{props.symbol}</td>
       <td className="text-gray-900">{`${data.bid}`.substring(0,8)}</td>
       <td className="text-gray-900">{`${data.ask}`.substring(0,8)}</td>
-    </tr>), [data.bid, data.ask]);
+    </tr>
+    ), [data.bid, data.ask]);
   
   useEffect(() => {
     if(!props.data) return;
