@@ -10,7 +10,6 @@ module.exports = (settings, wss) => {
 
   if(!settings) throw new Error(`Falta preencher as configurações`)
 
-  settings.secretKey = crypto.decrypt(settings.secretKey);
   const exchange = require('./utils/exchange')(settings);
 
   function broadcast(jsonObject){
