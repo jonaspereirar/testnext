@@ -13,28 +13,33 @@ module.exports = (settings, wss) => {
   settings.secretKey = crypto.decrypt(settings.secretKey);
   const exchange = require('./utils/exchange')(settings);
 
-  exchange.miniTickerStream((markets) => {
-    //console.log(markets);
+  function broadcast(jsonObject){
     if(!wss || !wss.clients) return;
     wss.clients.forEach(client => {
       if(client.readyState === webSocket.OPEN) {
-        client.send(JSON.stringify({ miniTicker: markets }))
+        client.send(JSON.stringify({ jsonObject }))
       }
-    })
+    });
+  }
+
+  exchange.miniTickerStream((markets) => {
+    //console.log(markets);
+    broadcast({ miniTicker: markets });
   })
   let book = [];
   exchange.bookStream((order) => {
-    if(!wss || !wss.clients) return;
     if(book.length === 200) {
-      wss.clients.forEach(client => {
-        if(client.readyState === webSocket.OPEN) {
-          client.send(JSON.stringify({ book }))
-        }
-      });
+      broadcast({ book });
       book = [];
     }else book.push(order);
 
   })
+
+  exchange.userDataStream(balanceData => {
+    broadcast({ balance: balanceData })
+  },
+  executionData => { console.log(executionData) },
+  )
 
   console.log(`App Exchange Monitor is running` );
 
